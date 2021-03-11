@@ -58,6 +58,28 @@ function Theta=ModeleGeometriqueInverse(alpha, Px0, Py, v, dt, L1, L2, L3)
     end
 endfunction
 
+function res=optimum(Py)
+    L1 = 0.3
+    L2 = 0.25
+    L3 = 0.05
+    alpha = %pi/2
+    Px0 = (L1+L2+L3-Py)/2
+    dt = 0.02
+    
+    Theta = ModeleGeometriqueInverse(alpha, Px0, Py, Voppose, dt, L1, L2, L3)
+    
+    n = length(Theta(:, 1))-1
+    P0 = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+    Px = P0(1)
+    Py = P0(2)
+    
+    Theta = ModeleGeometriqueInverse(alpha, Px, Py, V, dt, L1, L2, L3)
+    
+    Pn = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+    
+    res = Pn(1)-P0(1)
+endfunction
+
 L1 = 0.3
 L2 = 0.25
 L3 = 0.05
@@ -67,6 +89,14 @@ Px0 = (L1+L2+L3-Py)/2
 dt = 0.02
 
 Theta = ModeleGeometriqueInverse(alpha, Px0, Py, Voppose, dt, L1, L2, L3)
+
+// Paramètres d'affichage
+Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)))
+for i=2:length(Theta(:, 1))
+    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3))
+end
+
+Plot(NTiges, Lparam, dt, L1+L2+L3, %t)
 
 n = length(Theta(:, 1))-1
 P = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
