@@ -35,81 +35,59 @@ function v=Voppose(t)
     v = -V(t)
 endfunction
 
-function Theta=ModeleGeometriqueInverse(alpha, Px0, Py, v, dt, L1, L2, L3)
-    t = 0
-    i = 1
-    Px = Px0
-    theta = Modelegeo(alpha, Px0, Py, L1, L2, L3)
-    Theta = matrix(theta, 1, -1)
+function Theta=ModeleGeometriqueInverse(alpha, Px, Py, v, dt, L1, L2, L3)
+    i = 0
+    Theta = matrix([0, 0, 0], 1, -1)
     vectWP = CylToCart([L3, alpha])
-    pasfini1 = %T
-    pasfini2 = %T
-    while pasfini1 && pasfini2
-        t = t + dt
-        Px = Px0 + t*v(t)
+    pasfini = %T
+    while pasfini
+        Px = Px + dt*v(i*dt)
         i = i+1
         theta = Modelegeo(alpha, Px, Py, L1, L2, L3)
         if theta~=%F then
             Theta(i, :) = theta
-            pasfini2 = ~membreCasse(Theta(i, :))
+            pasfini = ~membreCasse(Theta(i, :))
         else
-            pasfini1 = %F
+            pasfini = %F
         end
     end
 endfunction
 
-function res=optimum(Py)
-    L1 = 0.3
-    L2 = 0.25
-    L3 = 0.05
-    alpha = %pi/2
+function res=optimum(Py, L1, L2, L3, alpha)
     Px0 = (L1+L2+L3-Py)/2
     dt = 0.02
     
     Theta = ModeleGeometriqueInverse(alpha, Px0, Py, Voppose, dt, L1, L2, L3)
     
-    n = length(Theta(:, 1))-1
-    P0 = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
-    Px = P0(1)
-    Py = P0(2)
-    
-    Theta = ModeleGeometriqueInverse(alpha, Px, Py, V, dt, L1, L2, L3)
-    
-    Pn = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
-    
-    res = Pn(1)-P0(1)
+    n = length(Theta(:, 1))
+    if (Theta(1, :)==[0, 0, 0] && n==1) then
+        res = 0
+    else
+        P0 = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+        Px = P0(1)
+        Py = P0(2)
+        
+        Theta = ModeleGeometriqueInverse(alpha, Px, Py, V, dt, L1, L2, L3)
+        
+        Pn = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+        
+        res = Pn(1)-P0(1)
+    end
 endfunction
 
 L1 = 0.3
 L2 = 0.25
 L3 = 0.05
 alpha = %pi/2
-Py = 0.25
-Px0 = (L1+L2+L3-Py)/2
-dt = 0.02
-
-Theta = ModeleGeometriqueInverse(alpha, Px0, Py, Voppose, dt, L1, L2, L3)
-
-// Paramètres d'affichage
-Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)))
-for i=2:length(Theta(:, 1))
-    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3))
+Py = 0:0.01:(L1+L2+L3)
+distance = []
+argmax = 1
+for i=1:length(Py)
+    distance(i) = optimum(Py(i), L1, L2, L3, alpha)
+    if distance(i)>distance(argmax) then
+        argmax = i
+    end
 end
 
-Plot(NTiges, Lparam, dt, L1+L2+L3, %t)
-
-n = length(Theta(:, 1))-1
-P = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
-Px = P(1)
-Py = P(2)
-
-Theta = ModeleGeometriqueInverse(alpha, Px, Py, V, dt, L1, L2, L3)
-
-// Paramètres d'affichage
-Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)))
-for i=2:length(Theta(:, 1))
-    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3))
-end
-
-//Plot(NTiges, Lparam, dt, L1+L2+L3, %t)
-PlotAndSave(NTiges, Lparam, 'BrasHorizontal.gif', dt, 10, L1+L2, %t)
+plot(Py, distance)
+disp(Py(argmax))

@@ -35,25 +35,20 @@ function v=Voppose(t)
     v = -V(t)
 endfunction
 
-function Theta=ModeleGeometriqueInverse(alpha, Px0, Py, v, dt, L1, L2, L3)
-    t = 0
-    i = 1
-    Px = Px0
-    theta = Modelegeo(alpha, Px0, Py, L1, L2, L3)
-    Theta = matrix(theta, 1, -1)
+function Theta=ModeleGeometriqueInverse(alpha, Px, Py, v, dt, L1, L2, L3)
+    i = 0
+    Theta = matrix([0, 0, 0], 1, -1)
     vectWP = CylToCart([L3, alpha])
-    pasfini1 = %T
-    pasfini2 = %T
-    while pasfini1 && pasfini2
-        t = t + dt
-        Px = Px0 + t*v(t)
+    pasfini = %T
+    while pasfini
+        Px = Px + dt*v(i*dt)
         i = i+1
         theta = Modelegeo(alpha, Px, Py, L1, L2, L3)
         if theta~=%F then
             Theta(i, :) = theta
-            pasfini2 = ~membreCasse(Theta(i, :))
+            pasfini = ~membreCasse(Theta(i, :))
         else
-            pasfini1 = %F
+            pasfini = %F
         end
     end
 endfunction
@@ -62,13 +57,13 @@ L1 = 0.3
 L2 = 0.25
 L3 = 0.05
 alpha = %pi/2
-Py = 0.25
+Py = 0.53
 Px0 = (L1+L2+L3-Py)/2
 dt = 0.02
 
 Theta = ModeleGeometriqueInverse(alpha, Px0, Py, Voppose, dt, L1, L2, L3)
 
-n = length(Theta(:, 1))-1
+n = length(Theta(:, 1))
 P = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
 Px = P(1)
 Py = P(2)
