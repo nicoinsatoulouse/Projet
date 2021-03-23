@@ -70,10 +70,20 @@ Py = P(2)
 
 Theta = ModeleGeometriqueInverse(alpha, Px, Py, V, dt, L1, L2, L3)
 
+Beta = %pi/2 - alpha
+direct = CylToCart([1, Beta])
+Lj = L1+L2
+n = length(Theta(:, 1))
+
 // Paramètres d'affichage
-Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)))
-for i=2:length(Theta(:, 1))
-    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3))
+Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
+for i=2:n
+    P = P + dt*V(i*dt)*direct
+    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
+end
+for i=n:(n+100)
+    P = P + dt*V(i*dt)*direct
+    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(n, 1), 'r2', L2, 'theta2', Theta(n, 1)+Theta(n, 2), 'r3', L3, 'theta3', Theta(n, 1)+Theta(n, 2)+Theta(n, 3), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
 end
 
 //Plot(NTiges, Lparam, dt, L1+L2+L3, %t)

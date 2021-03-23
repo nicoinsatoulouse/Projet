@@ -61,43 +61,44 @@ function Theta=ModeleGeometriqueInverseRotationBase(alpha, Px, Py, v, dt, L1, L2
     end
 endfunction
 
+function res=optimum(r, L1, L2, L3, alpha)
+    P = [(L1+L2+L3-r)/2, r]
+    P = rotation(P, alpha-%pi/2)
+    Px = P(1)
+    Py = P(2)
+    dt = 0.02
+    
+    Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, Voppose, dt, L1, L2, L3)
+    
+    n = length(Theta(:, 1))
+    if (Theta(1, :)==[0, 0, 0] && n==1) then
+        res = 0
+    else
+        P0 = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+        Px = P0(1)
+        Py = P0(2)
+        
+        Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, V, dt, L1, L2, L3)
+        n = length(Theta(:, 1))
+        Pn = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
+        
+        res = norm(Pn-P0)
+    end
+endfunction
+
 L1 = 0.3
 L2 = 0.25
 L3 = 0.05
 alpha = %pi/8
-r = 0.53
-P = [(L1+L2+L3-r)/2, r]
-P = rotation(P, alpha-%pi/2)
-Px = P(1)
-Py = P(2)
-dt = 0.02
-
-Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, Voppose, dt, L1, L2, L3)
-
-n = length(Theta(:, 1))
-P = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
-Px = P(1)
-Py = P(2)
-disp(P, n)
-
-Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, V, dt, L1, L2, L3)
-
-Beta = alpha - %pi/2
-direct = CylToCart([1, Beta])
-Lj = L1+L2
-n = length(Theta(:, 1))
-
-// Paramètres d'affichage
-Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', Theta(1, 1), 'r2', L2, 'theta2', Theta(1, 1)+Theta(1, 2), 'r3', L3, 'theta3', Theta(1, 1)+Theta(1, 2)+Theta(1, 3)), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
-for i=2:n
-    P = P + dt*V(i*dt)*direct
-    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(i, 1), 'r2', L2, 'theta2', Theta(i, 1)+Theta(i, 2), 'r3', L3, 'theta3', Theta(i, 1)+Theta(i, 2)+Theta(i, 3), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
-end
-for i=n:(n+100)
-    P = P + dt*V(i*dt)*direct
-    Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', Theta(n, 1), 'r2', L2, 'theta2', Theta(n, 1)+Theta(n, 2), 'r3', L3, 'theta3', Theta(n, 1)+Theta(n, 2)+Theta(n, 3), 'Javelot', %T, 'xJavelot', P(1), 'yJavelot', P(2), 'LJavelot', Lj, 'thetaJavelot', Beta)
+r = 0:0.001:(L1+L2+L3)
+distance = []
+argmax = 1
+for i=1:length(r)
+    distance(i) = optimum(r(i), L1, L2, L3, alpha)
+    if distance(i)>distance(argmax) then
+        argmax = i
+    end
 end
 
-//Plot(NTiges, Lparam, dt, L1+L2+L3, %t)
-PlotAndSave(NTiges, Lparam, 'Bras.gif', dt, 10, L1+L2, %t)
-plot(0.5030501, 0.1704864, 'ro')
+plot(r, distance)
+optimum(0.53, L1, L2, L3, alpha)
