@@ -1,4 +1,3 @@
-exec(pwd()+"\resolutionEDO.sci")
 exec(pwd()+"\PlotSave.sci")
 exec(pwd()+"\CartCyl.sci")
 
