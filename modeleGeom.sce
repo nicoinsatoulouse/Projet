@@ -1,7 +1,7 @@
 exec(pwd()+"\PlotSave.sci")
 exec(pwd()+"\CartCyl.sci")
 
-function Theta=Modelegeo(alpha,Px,Py,L1,L2,L3)
+function theta=Modelegeo(alpha,Px,Py,L1,L2,L3)
     l=[L1,L2,L3]
     Wx=Px-l(3)*cos(alpha)
     Wy=Py-l(3)*sin(alpha)
@@ -10,20 +10,20 @@ function Theta=Modelegeo(alpha,Px,Py,L1,L2,L3)
         T2 = atan(sqrt(1-y^2), y)
         T1 = atan(-l(2)*sin(T2)*Wx+(l(1)+l(2)*cos(T2))*Wy, l(2)*sin(T2)*Wy+(l(1)+l(2)*cos(T2))*Wx)
         T3=alpha-T1-T2
-        Theta=[T1,T2,T3]
+        theta=[T1,T2,T3]
     else
-        Theta=%F
+        theta=%F
     end
 endfunction
 
-function bool=membreCasse(Theta)
+function bool=membreCasse(theta)
     epauleMax = %pi/2
     epauleMin = -140/180*%pi
     coudeMax = 145/180*%pi
     coudeMin = 0
     poigneMax = 15/180*%pi
     poigneMin = -45/180*%pi
-    bool=(Theta(1)>epauleMax | Theta(1)<epauleMin | Theta(2)>coudeMax | Theta(2)<coudeMin | Theta(3)>poigneMax | Theta(3)<poigneMin)
+    bool=(theta(1)>epauleMax | theta(1)<epauleMin | theta(2)>coudeMax | theta(2)<coudeMin | theta(3)>poigneMax | theta(3)<poigneMin)
 endfunction
 
 function v=V(t)

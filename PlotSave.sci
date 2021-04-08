@@ -21,6 +21,10 @@ function res=PlotAndSave(obj, Lparamobj, outgif, dt, fps, tailleMax, persistent)
         drawlater()
         if ~persistent then
             delete(h)
+        else
+            if is_param(Lparamobj(i), 'Javelot') && get_param(Lparamobj(i), 'Javelot')(1)==%T then
+                delete(h(length(h)))
+            end
         end
         h = obj(Lparamobj(i))
         drawnow()
@@ -48,6 +52,10 @@ function res=Plot(obj, Lparamobj, dt, tailleMax, persistent)
         drawlater()
         if ~persistent then
             delete(h)
+        else
+            if is_param(Lparamobj(i), 'Javelot') && get_param(Lparamobj(i), 'Javelot')(1)==%T then
+                delete(h(length(h)))
+            end
         end
         tempsAct = Pause(tempsAct, dt) //Pour un resultat en temps réel (hors lags)
         h = obj(Lparamobj(i))
@@ -77,5 +85,16 @@ function h=NTiges(params)
         xy = CylToCart([r, theta])
         h(i) = plot([x0(1), x0(1)+xy(1)], [x0(2), x0(2)+xy(2)])
         x0 = x0+xy
+    end
+    if is_param(params, 'Javelot') && get_param(params, 'Javelot')(1)==%T then
+        x = get_param(params, 'xJavelot')(1)
+        y = get_param(params, 'yJavelot')(1)
+        xy = [x, y]
+        L = get_param(params, 'LJavelot')(1)
+        theta = get_param(params, 'thetaJavelot')(1)
+        dir = CylToCart([1, theta])
+        depart = xy - L/2*dir
+        fin = xy + L/2*dir
+        h(N+1) = plot([depart(1), fin(1)], [depart(2), fin(2)], 'r')
     end
 endfunction

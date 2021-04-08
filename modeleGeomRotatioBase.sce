@@ -63,7 +63,7 @@ endfunction
 L1 = 0.3
 L2 = 0.25
 L3 = 0.05
-alpha = %pi/8
+alpha = %pi/4
 r = 0.53
 P = [(L1+L2+L3-r)/2, r]
 P = rotation(P, alpha-%pi/2)
@@ -77,7 +77,6 @@ n = length(Theta(:, 1))
 P = CylToCart([L1, Theta(n, 1)]) + CylToCart([L2, Theta(n, 1)+Theta(n, 2)]) + CylToCart([L3, Theta(n, 1)+Theta(n, 2)+Theta(n, 3)])
 Px = P(1)
 Py = P(2)
-disp(P, n)
 
 Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, V, dt, L1, L2, L3)
 
@@ -99,4 +98,3 @@ end
 
 //Plot(NTiges, Lparam, dt, L1+L2+L3, %t)
 PlotAndSave(NTiges, Lparam, 'Bras.gif', dt, 10, L1+L2, %t)
-plot(0.5030501, 0.1704864, 'ro')

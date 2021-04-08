@@ -85,15 +85,15 @@ function res=optimum(r, L1, L2, L3, alpha)
     end
 endfunction
 
-function distance=plotMax(alpha, L1, L2, L3)
-    distance = []
+function Distance=ArrayMax(Alpha, L1, L2, L3)
+    Distance = []
     r = 0:0.01:(L1+L2+L3)
-    for i=1:length(alpha)
+    for i=1:length(Alpha)
         d = []
         for j=1:length(r)
-            d(j) = optimum(r(j), L1, L2, L3, alpha(i))
+            d(j) = optimum(r(j), L1, L2, L3, Alpha(i))
         end
-        distance(i) = max(d)
+        Distance(i) = max(d)
     end
 endfunction
 
@@ -102,6 +102,6 @@ L2 = 0.279
 L3 = 0.067
 alpha = 0:0.1:%pi
 
-distance=plotMax(alpha, L1, L2, L3)
+distance=ArrayMax(alpha, L1, L2, L3)
 
 plot(alpha, distance)
