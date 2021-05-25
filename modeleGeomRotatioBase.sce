@@ -27,7 +27,7 @@ function bool=membreCasse(Theta, alpha)
 endfunction
 
 function v=V(t)
-    v = 0.2
+    v = 20
 endfunction
 
 function v=Voppose(t)
@@ -60,11 +60,11 @@ function Theta=ModeleGeometriqueInverseRotationBase(alpha, Px, Py, v, dt, L1, L2
     end
 endfunction
 
-L1 = 0.3
-L2 = 0.25
-L3 = 0.05
+L1 = 28.6
+L2 = 27.9
+L3 = 6.7
 alpha = %pi/4
-r = 0.53
+r = 56
 P = [(L1+L2+L3-r)/2, r]
 P = rotation(P, alpha-%pi/2)
 Px = P(1)

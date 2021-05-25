@@ -74,11 +74,12 @@ function Thetakm=prop(Pxp,Pyp,L1,L2,L3,a,b,Gamma,Beta,Thetam,dt)
     J = [-L1*S1 - L2*S12 - L3*S123m, -L2*S12 - L3*S123m, -L3*S123m ;  L1*C1 + L2*C12 + L3*C123m, L2*C12 + L3*C123m, L3*C123m  ]
     Thetamp= pinv(J)*[Pxp ,Pyp]'
     Thetakm=[Thetam(1)+Thetamp(1), Thetam(2)+Thetamp(2), Thetam(3)+Thetamp(3), 0]
-    theta3 = angle(Thetakm(3) - %pi/2 + Gamma)
-    theta4 = a*theta3 + b
-    Thetakm(4) = angle(theta4 + Gamma)
-    theta4mSymetrie = 2*Beta - 2*sum(Thetakm(1:3)) - Thetakm(4)
-    Thetakm(4) = theta4mSymetrie
+    Thetakm(4) = Beta - Thetakm(1) - Thetakm(2) - Thetakm(3)
+    if Thetakm(4)<-%pi + Gamma then
+        Thetakm(4) = -%pi + Gamma
+    end
+    //theta4mSymetrie = 2*Beta - 2*sum(Thetakm(1:3)) - Thetakm(4)
+    //Thetakm(4) = theta4mSymetrie
 endfunction
 
 function bool=membreCasseProp(Thetam, Gamma)
@@ -101,13 +102,13 @@ function Thetam=Modele(Beta, Thetam0,dt,L1,L2,L3,a,b,Gamma, A)
         i = i+1
         thetam = prop(Pxp,Pyp,L1,L2,L3,a,b,Gamma,Beta,Thetam(i-1,:),dt)
         alpha = angle(sum(thetam(1:3)) + Gamma)
-        if  alpha - %pi/2 - Beta <= 0 then //thetam(3) - %pi/2 + Gamma >= 0 then
+        /*if  alpha - %pi/2 - Beta <= 0 then //thetam(3) - %pi/2 + Gamma >= 0 then
             pasfini = %F
             Thetam(i, :) = thetam
-        else
+        else*/
             Thetam(i, :) = thetam
             pasfini = ~membreCasseProp(Thetam(i, :), Gamma)
-        end
+        //end
     end
     disp(pasfini)
 endfunction
@@ -137,7 +138,7 @@ b = theta4i - a*theta3i
 P0=CylToCart([L1,Theta0m(1)])+CylToCart([L2,Theta0m(1)+ Theta0m(2)])+ CylToCart([L3,Theta0m(1)+ Theta0m(2)+Theta0m(3)])*/
 
 alpha = Beta + %pi/2
-r = 12
+r = 56
 P = [(L1+L2+L3-r)/2, r]
 P = rotation(P, alpha-%pi/2)
 Px = P(1)
@@ -149,7 +150,6 @@ n = length(ThetaMarcheArr(:, 1))
 // Paramètres d'affichage
 Lparam = list(init_param('N', 3, 'r1', L1, 'theta1', ThetaMarcheArr(1, 1), 'r2', L2, 'theta2', ThetaMarcheArr(1, 1)+ThetaMarcheArr(1, 2), 'r3', L3, 'theta3', ThetaMarcheArr(1, 1)+ThetaMarcheArr(1, 2)+ThetaMarcheArr(1, 3)))
 for i=2:n
-    P = P + dt*V(i*dt)*direct
     Lparam(i) = init_param('N', 3, 'r1', L1, 'theta1', ThetaMarcheArr(i, 1), 'r2', L2, 'theta2', ThetaMarcheArr(i, 1)+ThetaMarcheArr(i, 2), 'r3', L3, 'theta3', ThetaMarcheArr(i, 1)+ThetaMarcheArr(i, 2)+ThetaMarcheArr(i, 3))
 end
 
@@ -186,13 +186,14 @@ for i=2:n
     Lparamm(i) = init_param('N', 4, 'r1', L1, 'theta1', Thetam(i, 1), 'r2', L2, 'theta2', Thetam(i, 2), 'r3', L3, 'theta3', Thetam(i, 3), 'r4', Lj, 'theta4', Thetam(i, 4))
 end
 
-Lparam = list(init_param('N', 5, 'r1', L1, 'theta1', Thetam(1, 1), 'r2', L2, 'theta2', Thetam(1, 2), 'r3', lH, 'theta3', Thetam(1, 3) - %pi/2 + Gamma, 'r4', lA,'theta4', %pi/2, 'r5', Lj, 'theta5', Thetam(1, 4) - Gamma))
+Lparam = list(init_param('N', 5, 'r1', L1, 'theta1', Thetam(1, 1), 'r2', L2, 'theta2', Thetam(1, 2), 'r3', lH, 'theta3', Thetam(1, 3) - %pi/2 + Gamma, 'r4', lA,'theta4', %pi/2, 'r5', Lj, 'theta5', Thetam(1, 4) - Gamma, 'Javelot', %t))
 
 for i=2:n
-    Lparam(i) = init_param('N', 5, 'r1', L1, 'theta1', Thetam(i, 1), 'r2', L2, 'theta2', Thetam(i, 2), 'r3', lH, 'theta3', Thetam(i, 3) - %pi/2 + Gamma, 'r4', lA,'theta4', %pi/2, 'r5', Lj, 'theta5', Thetam(i, 4) - Gamma)
+    Lparam(i) = init_param('N', 5, 'r1', L1, 'theta1', Thetam(i, 1), 'r2', L2, 'theta2', Thetam(i, 2), 'r3', lH, 'theta3', Thetam(i, 3) - %pi/2 + Gamma, 'r4', lA,'theta4', %pi/2, 'r5', Lj, 'theta5', Thetam(i, 4) - Gamma, 'Javelot', %t)
 end
 
 
 //Plot(Propulseur, Lparam, dt, L1+L2+L3, %f)
+disp(Thetam(:, 4))
 PlotAndSave(Propulseur, Lparam, 'testprop.gif', dt*4, 10, L1+L3+L2, %t)
 //Propulseur(Lparam(2))

@@ -27,7 +27,7 @@ function bool=membreCasse(theta)
 endfunction
 
 function v=V(t)
-    v = 0.2
+    v = 20
 endfunction
 
 function v=Voppose(t)
@@ -52,11 +52,11 @@ function Theta=ModeleGeometriqueInverse(alpha, Px, Py, v, dt, L1, L2, L3)
     end
 endfunction
 
-L1 = 0.3
-L2 = 0.25
-L3 = 0.05
+L1 = 28.6
+L2 = 27.9
+L3 = 6.7
 alpha = %pi/2
-Py = 0.53
+Py = 53
 Px0 = (L1+L2+L3-Py)/2
 dt = 0.02
 

@@ -74,11 +74,9 @@ function Thetakm=prop(Pxp,Pyp,L1,L2,L3,a,b,Gamma,Beta,Thetam,dt)
     J = [-L1*S1 - L2*S12 - L3*S123m, -L2*S12 - L3*S123m, -L3*S123m ;  L1*C1 + L2*C12 + L3*C123m, L2*C12 + L3*C123m, L3*C123m  ]
     Thetamp= pinv(J)*[Pxp ,Pyp]'
     Thetakm=[Thetam(1)+Thetamp(1), Thetam(2)+Thetamp(2), Thetam(3)+Thetamp(3), 0]
-    theta3 = angle(Thetakm(3) - %pi/2 + Gamma)
-    theta4 = a*theta3 + b
-    Thetakm(4) = angle(theta4 + Gamma)
-    theta4mSymetrie = 2*Beta - 2*sum(Thetakm(1:3)) - Thetakm(4)
-    Thetakm(4) = theta4mSymetrie
+    Thetakm(4) = Beta - Thetakm(1) - Thetakm(2) - Thetakm(3)
+    //theta4mSymetrie = 2*Beta - 2*sum(Thetakm(1:3)) - Thetakm(4)
+    //Thetakm(4) = theta4mSymetrie
 endfunction
 
 function bool=membreCasseProp(Thetam, Gamma)
@@ -101,18 +99,19 @@ function Thetam=Modele(Beta, Thetam0,dt,L1,L2,L3,a,b,Gamma, A)
         i = i+1
         thetam = prop(Pxp,Pyp,L1,L2,L3,a,b,Gamma,Beta,Thetam(i-1,:),dt)
         alpha = angle(sum(thetam(1:3)) + Gamma)
-        if  alpha - %pi/2 - Beta <= 0 then //thetam(3) - %pi/2 + Gamma >= 0 then
+        /*if  alpha - %pi/2 - Beta <= 0 then //thetam(3) - %pi/2 + Gamma >= 0 then
             pasfini = %F
             Thetam(i, :) = thetam
-        else
+        else*/
             Thetam(i, :) = thetam
             pasfini = ~membreCasseProp(Thetam(i, :), Gamma)
-        end
+        //end
     end
+    disp(pasfini)
 endfunction
 
 function Thetam=Prop(lH, lA, L1, L2, dt, Beta, r)
-    L3=lH
+    /*L3=lH
     Lj = L1+L2
     Gamma = atan(lH, lA)
     
@@ -135,12 +134,44 @@ function Thetam=Prop(lH, lA, L1, L2, dt, Beta, r)
     theta4i = angle(Theta0m(4) - Gamma)
     theta3f = -0.5212609//-0.7909668//0
     theta4f = -%pi/2
-    a = 0.3(theta4f - theta4i)/(theta3f - theta3i)
+    a = 0.3*(theta4f - theta4i)/(theta3f - theta3i)
     b = theta4i - a*theta3i
     P0=CylToCart([L1,Theta0m(1)])+CylToCart([L2,Theta0m(1)+ Theta0m(2)])+ CylToCart([L3,Theta0m(1)+ Theta0m(2)+Theta0m(3)])
     
-    Thetam = Modele(Beta, Theta0m, dt, L1, L2, L3, a, b, Gamma, 1)
+    Thetam = Modele(Beta, Theta0m, dt, L1, L2, L3, a, b, Gamma, 1)*/
     
+    
+    
+L3=lH
+Lj = L1+L2
+Gamma = atan(lH, lA)
+    
+    alpha = Beta + %pi/2
+P = [(L1+L2+L3-r)/2, r]
+P = rotation(P, alpha-%pi/2)
+Px = P(1)
+Py = P(2)
+
+ThetaMarcheArr = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, Voppose, dt, L1, L2, L3)
+n = max(length(ThetaMarcheArr(:, 1)), 2)
+
+    
+    L3 = sqrt(lH^2 + lA^2)
+
+Theta0 = ThetaMarcheArr(n - 1, :)
+Theta0m = [Theta0(1), Theta0(2), Theta0(3) + %pi/2 - Gamma, angle(%pi + Gamma)]
+Theta0m(3) = angle(Beta + %pi - Gamma - Theta0m(1) - Theta0m(2))
+
+theta3i = angle(Theta0m(3) - %pi/2 + Gamma)
+theta4i = angle(Theta0m(4) - Gamma)
+theta3f = -0.5212609//-0.7909668//0
+theta4f = -%pi/2
+disp(theta3i, theta4i, theta3f, theta4f)
+a = 0.3(theta4f - theta4i)/(theta3f - theta3i)
+b = theta4i - a*theta3i
+P0=CylToCart([L1,Theta0m(1)])+CylToCart([L2,Theta0m(1)+ Theta0m(2)])+ CylToCart([L3,Theta0m(1)+ Theta0m(2)+Theta0m(3)])
+
+Thetam = Modele(Beta, Theta0m, dt, L1, L2, L3, a, b, Gamma, 1)
 endfunction
 
 lH = 6.7
@@ -152,21 +183,26 @@ dt = 0.005
 n=100
 m=100
 distance=[]
+rmax = []
 Beta=[]
 for i=1:n+1
     distance(i) = 0
     Beta(i)=-%pi/2 + (i-1)/n*%pi
+    d = []
     for j=1:m+1
         r = (j-1)/m*(L1 + L2 + lH)
-        
         Thetam = Prop(lH, lA, L1, L2, dt, Beta(i), r)
         
         l = length(Thetam(:, 1))
-        p0 =CylToCart([L1,Thetam(1,1)])+CylToCart([L2,Thetam(1,1)+ Thetam(1,2)])+ CylToCart([lH,Thetam(1,1)+ Thetam(1,2)+Thetam(1,3)])
-        p1 =CylToCart([L1,Thetam(l,1)])+CylToCart([L2,Thetam(l,1)+ Thetam(l,2)])+ CylToCart([lH,Thetam(l,1)+ Thetam(l,2)+Thetam(l,3)])
-        d=norm(p0-p1)
-        distance(i) = max(distance(i), d)
+        p0 = CylToCart([L1,Thetam(1,1)])+CylToCart([L2,Thetam(1,1)+ Thetam(1,2)])+ CylToCart([L3,Thetam(1,1)+Thetam(1,2)+Thetam(1,3)])
+        p1 = CylToCart([L1,Thetam(l,1)])+CylToCart([L2,Thetam(l,1)+ Thetam(l,2)])+ CylToCart([L3,Thetam(l,1)+ Thetam(l,2)+Thetam(l,3)])
+        d(j)=norm(p0-p1)
+        disp(d(j))
     end
+    [distance(i), index] = max(d)
+    rmax(i) = (index-1)/m*(L1 + L2 + lH)
 end
 
 plot(Beta,distance)
+show_window(1)
+plot(Beta, rmax)

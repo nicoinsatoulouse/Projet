@@ -27,7 +27,7 @@ function bool=membreCasse(Theta, alpha)
 endfunction
 
 function v=V(t)
-    v = 0.2
+    v = 20
 endfunction
 
 function v=Voppose(t)
@@ -65,7 +65,7 @@ function res=optimum(r, L1, L2, L3, alpha)
     P = rotation(P, alpha-%pi/2)
     Px = P(1)
     Py = P(2)
-    dt = 0.002
+    dt = 0.02
     
     Theta = ModeleGeometriqueInverseRotationBase(alpha, Px, Py, Voppose, dt, L1, L2, L3)
     
@@ -85,23 +85,27 @@ function res=optimum(r, L1, L2, L3, alpha)
     end
 endfunction
 
-function Distance=ArrayMax(Alpha, L1, L2, L3)
+function [Distance, R]=ArrayMax(Alpha, L1, L2, L3)
     Distance = []
-    r = 0:0.01:(L1+L2+L3)
+    R = []
+    r = 0:0.05:(L1+L2+L3)
     for i=1:length(Alpha)
         d = []
         for j=1:length(r)
             d(j) = optimum(r(j), L1, L2, L3, Alpha(i))
         end
-        Distance(i) = max(d)
+        [Distance(i), index] = max(d)
+        R(i) = r(index)
     end
 endfunction
 
-L1 = 0.286
-L2 = 0.279
-L3 = 0.067
+L1 = 28.6
+L2 = 27.9
+L3 = 6.7
 alpha = 0:0.1:%pi
 
-distance=ArrayMax(alpha, L1, L2, L3)
+[distance, rmax]=ArrayMax(alpha, L1, L2, L3)
 
-plot(alpha, distance)
+plot(alpha-%pi/2, distance)
+show_window(1)
+plot(alpha-%pi/2, rmax)

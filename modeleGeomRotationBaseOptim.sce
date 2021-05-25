@@ -85,11 +85,11 @@ function res=optimum(r, L1, L2, L3, alpha)
     end
 endfunction
 
-L1 = 0.3
-L2 = 0.25
-L3 = 0.05
+L1 = 0.286
+L2 = 0.279
+L3 = 0.067
 alpha = %pi/8
-r = 0:0.001:(L1+L2+L3)
+r = 0:0.005:(L1+L2+L3)
 distance = []
 argmax = 1
 for i=1:length(r)

@@ -14,7 +14,7 @@ function res=PlotAndSave(obj, Lparamobj, outgif, dt, fps, tailleMax, persistent)
     
     delay = round(1000/fps - modulo(1000/fps, 10)) //Pour que l'échelle temporelle soit OK dans le fichier enregistré
     mdelete(outgif);
-    idGif = animaGIF(gcf(), outgif, delay)
+    idGif = animaGIF(gcf(), outgif, delay, 2)
     
     pas = delay/(1000*dt) //Same shit d'échelle temporelle
     for i=2:pas:length(Lparamobj)
@@ -96,5 +96,30 @@ function h=NTiges(params)
         depart = xy - L/2*dir
         fin = xy + L/2*dir
         h(N+1) = plot([depart(1), fin(1)], [depart(2), fin(2)], 'r')
+    end
+endfunction
+
+function h=Propulseur(params)
+    // Affiche N tiges bout à bout dont la dernière est rouge
+    N = get_param(params, 'N')(1)
+    if is_param(params, 'x0') then
+        x0 = get_param(params, 'x0')
+    else
+        x0 = [0, 0]
+    end
+    theta = 0
+    for i=1:N
+        r = get_param(params, 'r'+string(i))(1)
+        theta = theta + get_param(params, 'theta'+string(i))(1)
+        xy = CylToCart([r, theta])
+        if i==N then
+            coul = "red"
+        elseif i==N-1 then
+            coul = "green"
+        else
+            coul = "blue"
+        end
+        h(i) = plot([x0(1), x0(1)+xy(1)], [x0(2), x0(2)+xy(2)], coul)
+        x0 = x0+xy
     end
 endfunction
